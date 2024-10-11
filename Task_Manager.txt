@@ -1,0 +1,157 @@
+import React, { useState } from 'react';
+import { View, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Text } from 'react-native';
+
+const App = () => {
+  const [task, setTask] = useState('');
+  const [priority, setPriority] = useState('low'); // Add priority feature
+  const [tasks, setTasks] = useState([]);
+
+  const addTask = () => {
+    if (task.trim() !== '') {
+      setTasks([...tasks, { id: Date.now().toString(), text: task, completed: false, priority }]);
+      setTask('');
+      setPriority('low'); // Reset priority after adding task
+    }
+  };
+
+  const toggleTask = (taskId) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((t) =>
+        t.id === taskId ? { ...t, completed: !t.completed } : t
+      )
+    );
+  };
+
+  const deleteTask = (taskId) => {
+    setTasks(tasks.filter(task => task.id !== taskId)); // Task deletion
+  };
+
+  const renderItem = ({ item }) => (
+    <View style={[styles.taskItem, item.priority === 'high' ? styles.highPriority : item.priority === 'medium' ? styles.mediumPriority : styles.lowPriority]}>
+      <TouchableOpacity onPress={() => toggleTask(item.id)} style={styles.taskContent}>
+        <View style={[styles.checkbox, { borderColor: item.completed ? 'gray' : 'gold' }]}>
+          {item.completed && <View style={styles.checkmark} />}
+        </View>
+        <Text style={[styles.taskText, { textDecorationLine: item.completed ? 'line-through' : 'none' }]}>
+          {item.text} ({item.priority.charAt(0).toUpperCase() + item.priority.slice(1)})
+        </Text>
+      </TouchableOpacity>
+      <Button title="Delete" color="#B22222" onPress={() => deleteTask(item.id)} /> 
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Task Manager</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Add a new task"
+        placeholderTextColor="#FFD700"
+        value={task}
+        onChangeText={setTask}
+      />
+      <View style={styles.priorityContainer}>
+        <TouchableOpacity style={styles.priorityButton} onPress={() => setPriority('low')}>
+          <Text style={styles.priorityText}>Low</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.priorityButton} onPress={() => setPriority('medium')}>
+          <Text style={styles.priorityText}>Medium</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.priorityButton} onPress={() => setPriority('high')}>
+          <Text style={styles.priorityText}>High</Text>
+        </TouchableOpacity>
+      </View>
+      <Button title="Add Task" color="#FFD700" onPress={addTask} />
+      <FlatList
+        data={tasks}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#4B0082', // Royal purple background
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFD700', // Gold color for title
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  input: {
+    height: 50,
+    borderColor: '#FFD700',
+    borderWidth: 2,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    color: '#FFD700',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  priorityContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  priorityButton: {
+    padding: 10,
+    backgroundColor: '#FFD700',
+    borderRadius: 5,
+  },
+  priorityText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4B0082',
+  },
+  taskItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 2,
+  },
+  taskContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  highPriority: {
+    borderColor: '#FF4500', // High priority in red-orange
+  },
+  mediumPriority: {
+    borderColor: '#FFA500', // Medium priority in orange
+  },
+  lowPriority: {
+    borderColor: '#32CD32', // Low priority in green
+  },
+  checkbox: {
+    width: 25,
+    height: 25,
+    borderWidth: 2,
+    borderRadius: 5,
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkmark: {
+    width: 7,
+    height: 14,
+    borderBottomWidth: 2,
+    borderRightWidth: 2,
+    borderColor: '#FFD700',
+    transform: [{ rotate: '45deg' }],
+  },
+  taskText: {
+    fontSize: 20,
+    color: '#FFD700', // Gold color for task text
+  },
+});
+
+export default App;
